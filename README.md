@@ -1,0 +1,28 @@
+# ✅ Daily To-Do
+
+A simple daily to-do list with rewards. Plan your day, check things off, earn points, level up and unlock awards.
+
+## Features
+- **Today's list**: add, edit (tap the text), complete and delete tasks
+- **Fresh start every day**: unfinished tasks pop up the next morning, and you choose to add each one to today or discard it
+- **Rewards**
+  - ⭐ 10 points per task, 50 bonus points per award
+  - 📈 Levels (Beginner → Legend)
+  - 🔥 Day streak (days in a row with at least one task done)
+  - 🏆 15 awards: First Step, Perfect Day, Week Warrior, Early Bird, Night Owl, Second Chance and more
+- **History** of past days, plus backup download and restore
+- Works on phone and desktop, with automatic dark mode
+
+## Files
+| File | What it does |
+|---|---|
+| `index.html` | The page structure (what's on screen) |
+| `style.css` | How it looks (colors, layout, dark mode) |
+| `app.js` | How it works (tasks, carry-over, points, awards) |
+
+## Run it
+- **On your computer:** double-click `index.html` to open it in your browser.
+- **Online:** turn on GitHub Pages (Settings → Pages → Deploy from a branch).
+
+## Note on saving
+Tasks are saved in the browser you use. Each device keeps its own list for now. Use **History → Download backup / Restore backup** to move data between devices.

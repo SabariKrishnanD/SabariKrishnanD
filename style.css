@@ -1,0 +1,155 @@
+/* ===== Colors (light mode) ===== */
+:root {
+  --bg: #f5f6fb;
+  --card: #ffffff;
+  --text: #1c1d26;
+  --muted: #6b6f80;
+  --line: #e4e6ef;
+  --accent: #4f46e5;
+  --accent-soft: #eceafd;
+  --good: #16a34a;
+  --danger: #dc2626;
+  --gold: #f59e0b;
+  --shadow: 0 1px 3px rgba(20, 20, 40, 0.08);
+}
+
+/* ===== Colors (dark mode, follows your phone/computer setting) ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12131a;
+    --card: #1c1d27;
+    --text: #ececf3;
+    --muted: #9a9db0;
+    --line: #2c2e3b;
+    --accent: #8b85ff;
+    --accent-soft: #2a2850;
+    --good: #4ade80;
+    --danger: #f87171;
+    --gold: #fbbf24;
+    --shadow: none;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0 auto;
+  max-width: 640px;
+  padding: 16px 16px 80px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.4;
+}
+
+h1 { margin: 0; font-size: 1.6rem; }
+h2 { margin: 0 0 4px; font-size: 1.25rem; }
+.eyebrow { margin: 0; color: var(--accent); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.muted { color: var(--muted); margin: 0; font-size: 0.9rem; }
+.center { text-align: center; }
+.big { margin: 0; font-size: 1.2rem; font-weight: 600; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.row.end { justify-content: flex-end; }
+
+/* ===== Buttons ===== */
+.btn {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.small { padding: 6px 10px; font-size: 0.85rem; }
+
+/* ===== Header ===== */
+.top { display: flex; justify-content: space-between; align-items: flex-end; margin: 8px 0 14px; }
+.stats { display: flex; gap: 8px; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-weight: 700; }
+
+/* ===== Level bar ===== */
+.level-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.bar { height: 10px; background: var(--accent-soft); border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width 0.5s; }
+
+/* ===== Tabs ===== */
+.tabs { display: flex; gap: 4px; margin: 14px 0; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.tab { flex: 1; border: 0; background: none; color: var(--muted); padding: 9px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
+.tab.active { background: var(--accent-soft); color: var(--accent); }
+
+/* ===== Progress ring ===== */
+.progress-card { display: flex; align-items: center; gap: 14px; }
+.ring { width: 64px; height: 64px; transform: rotate(-90deg); flex-shrink: 0; }
+.ring-bg, .ring-fg { fill: none; stroke-width: 3.5; }
+.ring-bg { stroke: var(--accent-soft); }
+.ring-fg { stroke: var(--good); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 0.5s; }
+
+/* ===== Add task ===== */
+.add { display: flex; gap: 8px; margin: 14px 0; }
+.add input {
+  flex: 1; min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+}
+.add input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+
+/* ===== Task list ===== */
+.tasks, .carry, .history { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.task { display: flex; align-items: center; gap: 10px; }
+.task input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--good); flex-shrink: 0; cursor: pointer; }
+.task .text { flex: 1; min-width: 0; overflow-wrap: anywhere; cursor: text; }
+.task.done .text { text-decoration: line-through; color: var(--muted); }
+.task .edit-input { flex: 1; min-width: 0; font: inherit; padding: 4px 6px; border: 1px solid var(--accent); border-radius: 6px; background: var(--card); color: var(--text); }
+.tag { font-size: 0.72rem; background: var(--accent-soft); color: var(--accent); padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+.icon-btn { border: 0; background: none; color: var(--muted); font-size: 1.05rem; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+.icon-btn:hover { color: var(--danger); }
+.empty { text-align: center; color: var(--muted); padding: 24px 0; }
+
+/* ===== Awards ===== */
+.badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
+.badge { text-align: center; padding: 14px 10px; }
+.badge .emoji { font-size: 2rem; }
+.badge strong { display: block; margin-top: 4px; }
+.badge.locked { opacity: 0.45; filter: grayscale(1); }
+.badge.locked .emoji::after { content: " 🔒"; font-size: 0.9rem; }
+.badge small { color: var(--muted); display: block; margin-top: 4px; }
+
+/* ===== History ===== */
+.history li { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.backup { margin-top: 16px; }
+
+/* ===== Carry-over pop-up ===== */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+.modal-backdrop[hidden] { display: none; }
+.modal { background: var(--card); border-radius: 16px; padding: 20px; width: 100%; max-width: 460px; max-height: 85vh; overflow: auto; }
+.carry { margin-top: 12px; }
+.carry li { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.carry .text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.carry .from { display: block; font-size: 0.75rem; color: var(--muted); }
+
+/* ===== Toast messages ===== */
+.toasts { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); display: grid; gap: 8px; z-index: 20; width: calc(100% - 32px); max-width: 420px; }
+.toast { background: var(--text); color: var(--bg); padding: 12px 16px; border-radius: 12px; font-weight: 600; animation: pop 0.3s ease-out; }
+@keyframes pop { from { transform: translateY(20px); opacity: 0; } }
+
+/* ===== Confetti ===== */
+.confetti { position: fixed; top: -10px; width: 8px; height: 14px; z-index: 30; pointer-events: none; animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: 0.7; } }
+@media (prefers-reduced-motion: reduce) { .confetti { display: none; } }

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Daily To-Do</title>
+  <meta name="theme-color" content="#4f46e5" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ===== Top bar: date + level/points/streak ===== -->
+  <header class="top">
+    <div>
+      <p class="eyebrow" id="weekday">Today</p>
+      <h1 id="dateTitle">—</h1>
+    </div>
+    <div class="stats">
+      <div class="stat" title="Day streak">🔥 <span id="streak">0</span></div>
+      <div class="stat" title="Points">⭐ <span id="points">0</span></div>
+    </div>
+  </header>
+
+  <!-- ===== Level progress bar ===== -->
+  <section class="level card">
+    <div class="level-row">
+      <strong id="levelName">Level 1 · Beginner</strong>
+      <span class="muted" id="levelNext">0 / 100 pts</span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="levelBar"></div></div>
+  </section>
+
+  <!-- ===== Tabs ===== -->
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="today" role="tab">Today</button>
+    <button class="tab" data-tab="awards" role="tab">Awards</button>
+    <button class="tab" data-tab="history" role="tab">History</button>
+  </nav>
+
+  <main>
+    <!-- ===== TODAY ===== -->
+    <section id="tab-today" class="panel">
+      <div class="card progress-card">
+        <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
+          <circle class="ring-bg" cx="18" cy="18" r="15.9" />
+          <circle class="ring-fg" id="ring" cx="18" cy="18" r="15.9" />
+        </svg>
+        <div>
+          <p class="big" id="progressText">0 of 0 done</p>
+          <p class="muted" id="progressHint">Add your first task for today 👇</p>
+        </div>
+      </div>
+
+      <form id="addForm" class="add">
+        <input id="newTask" type="text" placeholder="What do you want to get done today?" maxlength="200" autocomplete="off" />
+        <button type="submit" class="btn primary">Add</button>
+      </form>
+
+      <ul id="taskList" class="tasks"></ul>
+    </section>
+
+    <!-- ===== AWARDS ===== -->
+    <section id="tab-awards" class="panel" hidden>
+      <p class="muted center" id="awardCount"></p>
+      <div id="badgeGrid" class="badges"></div>
+    </section>
+
+    <!-- ===== HISTORY ===== -->
+    <section id="tab-history" class="panel" hidden>
+      <ul id="historyList" class="history"></ul>
+      <div class="card backup">
+        <strong>Backup</strong>
+        <p class="muted">Your tasks are saved in this browser. Download a backup to move them to another device.</p>
+        <div class="row">
+          <button class="btn" id="exportBtn">Download backup</button>
+          <label class="btn">Restore backup<input type="file" id="importFile" accept="application/json" hidden /></label>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Pop-up for yesterday's unfinished tasks ===== -->
+  <div class="modal-backdrop" id="carryModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="carryTitle">
+      <h2 id="carryTitle">Unfinished from before</h2>
+      <p class="muted">Keep them for today, or let them go.</p>
+      <ul id="carryList" class="carry"></ul>
+      <div class="row end">
+        <button class="btn" id="discardAll">Discard all</button>
+        <button class="btn primary" id="keepAll">Add all to today</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Award pop-up messages appear here -->
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
