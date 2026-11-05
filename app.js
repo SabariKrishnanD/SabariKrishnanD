@@ -25,6 +25,8 @@ function load() {
 
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  // If cloud sync is switched on (see sync.js), send the change to your other devices too.
+  if (window.cloudSave) window.cloudSave(data);
 }
 
 let data = load();
@@ -428,6 +430,17 @@ function startDay() {
 }
 
 startDay();
+
+// Lets sync.js read the data and swap in the latest copy from the cloud.
+window.DailyTodo = {
+  getData: () => data,
+  replaceData(newData) {
+    data = { days: {}, badges: {}, ...newData };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    startDay();
+  },
+  toast,
+};
 
 // If the app stays open past midnight, switch to the new day automatically.
 setInterval(() => {
