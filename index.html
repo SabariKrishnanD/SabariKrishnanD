@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Daily To-Do</title>
   <meta name="theme-color" content="#4f46e5" />
+  <!-- Security: the browser will only run code and connect to places listed here.
+       Firebase (Google) addresses are allowed so sign-in and sync work. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://www.gstatic.com https://apis.google.com;
+    style-src 'self';
+    img-src 'self' data: https://*.googleusercontent.com;
+    connect-src 'self' https://*.googleapis.com;
+    frame-src https://*.firebaseapp.com https://*.web.app https://accounts.google.com;
+    object-src 'none';
+    base-uri 'none';
+    form-action 'self';" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>

@@ -28,19 +28,39 @@ You'll need: a Google account and your app's web address (`https://sabarikrishna
 1. In the left menu: **Build → Firestore Database → Create database**.
 2. Pick a location close to you (for example `asia-south1` for India) and click **Next**.
 3. Choose **Start in production mode** and click **Create**.
-4. Open the **Rules** tab, replace everything with the rules below, and click **Publish**:
+4. Open the **Rules** tab, replace everything with the rules below, and change `YOUR_EMAIL@gmail.com` to **your own Google email**. Then click **Publish**:
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Each person can only read and write their own tasks.
+
+    // Only YOUR Google account can use this database. Anyone else who signs in gets nothing.
+    function isMe(userId) {
+      return request.auth != null
+        && request.auth.uid == userId
+        && request.auth.token.email == "YOUR_EMAIL@gmail.com"
+        && request.auth.token.email_verified == true;
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isMe(userId);
+      // Only accept data in the shape the app writes, and under 1 MB.
+      allow write: if isMe(userId)
+        && request.resource.data.keys().hasOnly(["json", "updatedAt"])
+        && request.resource.data.json is string
+        && request.resource.data.json.size() < 1000000;
+    }
+
+    // Everything else is locked.
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
 ```
+
+> These rules live in Firebase, not in your public GitHub repo, so your email isn't published.
 
 ## 5. Paste your settings into the app
 1. On GitHub, open your repo and click **`firebase-config.js`**, then the ✏️ (pencil) icon to edit.
@@ -68,8 +88,18 @@ From then on, changes show up on your other devices within a second or two. If y
 
 ---
 
+## 7. Extra protection (recommended, 3 minutes)
+1. **Lock your API key to your website.** Go to **https://console.cloud.google.com/apis/credentials**, pick your Firebase project at the top, and click the key named **"Browser key (auto created by Firebase)"**. Under **Application restrictions**, choose **Websites** and add:
+   - `https://sabarikrishnand.github.io/*`
+   - `https://YOUR-PROJECT-ID.firebaseapp.com/*` (your `authDomain` from step 2; sign-in needs it)
+
+   Click **Save**. Other websites can no longer use your key.
+2. **Stay on the free "Spark" plan.** It has no payment method, so you can never be charged. If Firebase ever offers an upgrade, you don't need it.
+3. **On a shared or public computer**, use **Sign out** and choose **OK** when asked to remove your tasks from the device.
+
 ### Something not working?
 - **"Sign-in failed… unauthorized-domain"**: redo step 3.3 and check the spelling of the domain.
 - **"Missing or insufficient permissions"**: redo step 4.4 and make sure you clicked **Publish**.
+- **"API key not valid" or "requests from this referrer are blocked"**: in step 7.1, check that both website lines are exactly right, then wait 5 minutes.
 - **No sign-in button appears**: check that `firebase-config.js` was saved with your settings, then refresh the page.
 - **Sign-in pop-up does nothing on your phone**: allow pop-ups for the site, or try again in Chrome or Safari, not inside another app's built-in browser.

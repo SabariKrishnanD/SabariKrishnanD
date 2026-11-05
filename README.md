@@ -22,6 +22,7 @@ A simple daily to-do list with rewards. Plan your day, check things off, earn po
 | `app.js` | How it works (tasks, carry-over, points, awards) |
 | `sync.js` | Keeps your devices in sync through Firebase |
 | `firebase-config.js` | Your Firebase settings (paste them here to turn on sync) |
+| `SECURITY.md` | What was security-tested and how the app is protected |
 
 ## Run it
 - **On your computer:** double-click `index.html` to open it in your browser. Sync only works from the online link.

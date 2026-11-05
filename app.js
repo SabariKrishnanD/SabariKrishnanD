@@ -13,14 +13,55 @@
 
 const STORAGE_KEY = "dailyTodo.v1";
 
-function load() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (saved && saved.days) return saved;
-  } catch (e) {
-    console.warn("Could not read saved data", e);
+const MAX_TASK_LENGTH = 200; // same as maxlength on the input in index.html
+const MAX_BACKUP_BYTES = 5 * 1024 * 1024; // 5 MB
+
+// Security: never trust saved data, backup files or cloud data as they are.
+// sanitize() rebuilds the data keeping only fields we expect, in the shape we expect,
+// so a broken or booby-trapped file can't crash the app or sneak in anything odd.
+function sanitize(raw) {
+  const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
+  const isDateKey = (v) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  const isTime = (v) => typeof v === "string" && v.length < 40 && !isNaN(Date.parse(v));
+  const clean = { days: {}, badges: {} };
+  if (!isObj(raw)) return clean;
+
+  for (const [key, day] of Object.entries(isObj(raw.days) ? raw.days : {})) {
+    if (!isDateKey(key) || !isObj(day) || !Array.isArray(day.tasks)) continue;
+    const tasks = [];
+    for (const t of day.tasks.slice(0, 500)) {
+      if (!isObj(t) || typeof t.text !== "string" || !t.text.trim()) continue;
+      const task = {
+        id: typeof t.id === "string" && t.id.length <= 64 ? t.id : newId(),
+        text: t.text.trim().slice(0, MAX_TASK_LENGTH),
+        done: t.done === true,
+        doneAt: t.done === true && isTime(t.doneAt) ? t.doneAt : null,
+      };
+      if (isDateKey(t.carriedFrom)) task.carriedFrom = t.carriedFrom;
+      if (t.decided === "kept" || t.decided === "discarded") task.decided = t.decided;
+      tasks.push(task);
+    }
+    clean.days[key] = { tasks };
+    if (day.reviewed === true) clean.days[key].reviewed = true;
   }
-  return { days: {}, badges: {} }; // fresh start
+
+  for (const [id, when] of Object.entries(isObj(raw.badges) ? raw.badges : {})) {
+    if (/^[a-z0-9]{1,20}$/.test(id) && isTime(when)) clean.badges[id] = when;
+  }
+  return clean;
+}
+
+function load() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return { days: {}, badges: {} }; // fresh start
+  try {
+    return sanitize(JSON.parse(raw));
+  } catch (e) {
+    // Don't throw away unreadable data: keep a copy so it could be recovered by hand.
+    console.warn("Could not read saved data", e);
+    localStorage.setItem(STORAGE_KEY + ".unreadable", raw);
+    return { days: {}, badges: {} };
+  }
 }
 
 function save() {
@@ -53,7 +94,9 @@ function getDay(key) {
   return data.days[key];
 }
 
-const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function newId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
 
 // ---------- Rewards: points, levels, streaks ----------
 
@@ -175,7 +218,7 @@ function deleteTask(id) {
 
 function renameTask(id, text) {
   const t = findTask(id);
-  if (t && text.trim()) { t.text = text.trim(); save(); }
+  if (t && text.trim()) { t.text = text.trim().slice(0, MAX_TASK_LENGTH); save(); }
 }
 
 // ---------- Unfinished tasks from earlier days ----------
@@ -304,6 +347,7 @@ function startEdit(li, t) {
   const input = document.createElement("input");
   input.className = "edit-input";
   input.value = t.text;
+  input.maxLength = MAX_TASK_LENGTH;
   span.replaceWith(input);
   input.focus();
   const finish = () => { renameTask(t.id, input.value); render(); };
@@ -404,10 +448,12 @@ document.getElementById("importFile").onchange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   try {
+    if (file.size > MAX_BACKUP_BYTES) throw new Error("The file is too big to be a Daily To-Do backup");
     const parsed = JSON.parse(await file.text());
-    if (!parsed.days) throw new Error("Not a Daily To-Do backup");
+    if (!parsed || typeof parsed.days !== "object") throw new Error("Not a Daily To-Do backup");
+    const clean = sanitize(parsed); // only checked, cleaned data gets in
     if (!confirm("Replace the tasks on this device with the backup?")) return;
-    data = { badges: {}, ...parsed };
+    data = clean;
     save();
     startDay();
     toast("✅ Backup restored");
@@ -434,8 +480,9 @@ startDay();
 // Lets sync.js read the data and swap in the latest copy from the cloud.
 window.DailyTodo = {
   getData: () => data,
+  sanitize,
   replaceData(newData) {
-    data = { days: {}, badges: {}, ...newData };
+    data = sanitize(newData); // cloud data is checked just like backups
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     startDay();
   },

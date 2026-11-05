@@ -34,7 +34,8 @@ async function start() {
   const { initializeApp } = await import(`${SDK}/firebase-app.js`);
   const { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } =
     await import(`${SDK}/firebase-auth.js`);
-  const { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, serverTimestamp } =
+  const { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, onSnapshot, setDoc, serverTimestamp,
+    terminate, clearIndexedDbPersistence } =
     await import(`${SDK}/firebase-firestore.js`);
 
   const app = initializeApp(firebaseConfig);
@@ -57,8 +58,20 @@ async function start() {
     }
   };
 
-  signOutBtn.onclick = () => {
-    if (confirm("Sign out? Your tasks stay on this device but stop syncing.")) signOut(auth);
+  signOutBtn.onclick = async () => {
+    if (!confirm("Sign out of sync on this device?")) return;
+    const wipe = confirm(
+      "Also remove your tasks from this device?\n\n" +
+      "Choose OK on a shared or public computer. Your tasks stay safe in the cloud.\n" +
+      "Choose Cancel to keep a copy here."
+    );
+    await signOut(auth);
+    if (wipe) {
+      // Remove every local copy: the app's own storage and Firebase's offline cache.
+      Object.keys(localStorage).filter((k) => k.startsWith("dailyTodo")).forEach((k) => localStorage.removeItem(k));
+      try { await terminate(db); await clearIndexedDbPersistence(db); } catch (e) { console.warn(e); }
+      location.reload();
+    }
   };
 
   let stopListening = null;
@@ -102,7 +115,14 @@ async function start() {
       const cloudJson = snap.data().json;
       if (cloudJson === lastJson) return; // this is our own change coming back
       lastJson = cloudJson;
-      const cloud = JSON.parse(cloudJson);
+      let cloud;
+      try {
+        cloud = window.DailyTodo.sanitize(JSON.parse(cloudJson)); // check cloud data before using it
+      } catch (e) {
+        console.error("Cloud data unreadable", e);
+        text.textContent = "⚠️ Your cloud data couldn't be read. Nothing was changed.";
+        return;
+      }
 
       if (firstTimeHere) {
         // First sign-in on this device: combine, so tasks already added here aren't lost.
